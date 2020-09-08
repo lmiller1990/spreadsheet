@@ -8,7 +8,9 @@ Over the next few blog articles, I will build a mini spreadsheet clone (like Exc
 
 I am still not sure on the ideal way to design a spreadsheet engine. Any feedback is always welcome.
 
-## Thinking in Modules
+You can find the [completed source code here](https://github.com/lmiller1990/spreadsheet).
+
+## Modular Thinking
 
 So we are building a spreadsheet application; obviously we will need a UI, so people can interact with it; but the spreadsheet engine should be capable of doing everything without actually *needing* a UI. For example, you should also be able to use it from a terminal, if you really wanted.
 
