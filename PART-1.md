@@ -1,6 +1,6 @@
-## Data Structure Driven Development
+Over the next few blog articles, I will build a mini spreadsheet clone (like Excel). The goal isn't really to build a spreadsheet, but to show how thinking about data structures and how to represent concepts will help you separate your business logic and your UI layer. 
 
-Over the next few blog articles, I will build a mini spreadsheet clone (like Excel). The goal isn't really to build a spreadsheet, but to show how thinking about data structures and how to represent concepts will help you separate your business logic and your UI layer. This has many benefits:
+This has many benefits:
 
 - testability
 - reveals bad decision decisions early
