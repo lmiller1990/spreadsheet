@@ -1,53 +1,42 @@
-import { Sheet, calcMaxDimensions, render, Cell, UICell } from './spreadsheet'
+import { Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell } from './spreadsheet'
 
-describe('calcDimensions', () => {
-  it('works for many cells', () => {
-    const cell = (): Cell => ({
-      type: 'primitive',
-      value: ''
-    })
+const sheet: Sheet = {
+  cells: {
+    'a1': {
+      value: '100',
+      type: 'primitive'
+    },
+    'a2': {
+      value: '200',
+      type: 'primitive'
+    },
+    'b1': {
+      value: '300',
+      type: 'primitive'
+    },
+  }
+}
 
-    expect(calcMaxDimensions({
-      cells: {
-        'a1': cell(),
-        'b1': cell(),
-        'c1': cell(),
-        'a2': cell(),
-        'b2': cell(),
-        'c2': cell()
-      }
-    })).toEqual({ rows: 2, cols: 3 })
+describe('calcMaxDimensions', () => {
+  it('calcualtion dimensions', () => {
+    const actual = calcMaxDimensions(sheet)
+    const expected: Dimensions = {
+      cols: 2,
+      rows: 2
+    }
+
+    expect(actual).toEqual(expected)
   })
 })
 
 describe('render', () => {
-  test('transforms into a multidimensions array suitable for looping', () => {
-    const sheet: Sheet = {
-      cells: {
-        'a1': {
-          value: '1',
-          type: 'primitive',
-        },
-        'a2': {
-          value: '2',
-          type: 'primitive',
-        },
-        'b1': {
-          value: '3',
-          type: 'primitive',
-        },
-        'b2': {
-          value: '4',
-          type: 'primitive',
-        }
-      }
-    }
-
+  it('transforms into a ui rep', () => {
+    const actual = render(sheet)
     const expected: UICell[][] = [
-      [{ value: '1', col: 'a', row: 1 }, { value: '3', col: 'b', row: 1 }],
-      [{ value: '2', col: 'a', row: 2 }, { value: '4', col: 'b', row: 2 }],
+      [{ row: 1, col: 'a', value: '100' }, { row: 1, col: 'b', value: '300' }],
+      [{ row: 2, col: 'a', value: '200' }, { row: 2, col: 'b', value: '' }],
     ]
 
-    expect(render(sheet)).toEqual(expected)
+    expect(actual).toEqual(expected)
   })
 })

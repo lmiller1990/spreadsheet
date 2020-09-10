@@ -59,9 +59,7 @@ export default {
         editingCell.value = ''
       },
       enterInputMode: (cell: RenderedCell) => {
-        console.log(cell)
         editingCell.value = `${cell.row}${cell.col}`
-        console.log(cell)
         editingValue.value = cell.value
       }
     }
