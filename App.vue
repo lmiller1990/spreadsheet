@@ -1,27 +1,25 @@
 <template>
   <table>
-    <tr v-for="row in rows">
-      <td 
-        v-for="col in row"
-        @click="enterInputMode(col)"
-      >
-        {{ col.value }}
-        <div v-if="`${col.row}${col.col}` === editingCell">
-          <input 
-            v-model="editingValue" 
-            @keyup.enter="updateCell(col)"
-          />
-        </div>
-      </td>
-    </tr>    
+    <spreadsheet-header :colCount="sheet[0].length" />
+    <spreadsheet-body :sheet="sheet" />
   </table>
+  <pre>
+    {{ sheet }}
+  </pre>
 </template>
 
 <script lang="ts">
 import { reactive, ref, computed } from 'vue'
-import { Sheet, render, RenderedCell, updateCell } from './spreadsheet'
+import SpreadsheetHeader from './spreadsheet-header.vue'
+import SpreadsheetBody from './spreadsheet-body.vue'
+import { render, Sheet } from './spreadsheet'
 
 export default {
+  components: {
+    SpreadsheetHeader,
+    SpreadsheetBody
+  },
+
   setup() {
     const sheet = reactive<Sheet>({
       cells: {
@@ -44,25 +42,35 @@ export default {
       }
     })
 
-    const editingValue = ref<string>()
-    const editingCell = ref<string>()
-
-    const rows = computed(() => render(sheet))
-
     return {
-      rows,
-      editingCell,
-      editingValue,
-      updateCell: (cell: RenderedCell) => {
-        updateCell(sheet, cell, editingValue.value)
-        editingValue.value = ''
-        editingCell.value = ''
-      },
-      enterInputMode: (cell: RenderedCell) => {
-        editingCell.value = `${cell.row}${cell.col}`
-        editingValue.value = cell.value
-      }
+      sheet: computed(() => render(sheet))
     }
   } 
 }
 </script>
+
+<style>
+table {
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid;
+  width: 100px;
+  height: 30px;
+}
+
+input {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  width: 100%;
+  height: 100%;
+  font-family: initial;
+  font-size: initial;
+}
+
+td:first-child {
+  text-align: center;
+}
+</style>
