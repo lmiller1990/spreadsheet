@@ -4,7 +4,7 @@
   >
     <input 
       ref="cellRef"
-      v-model="cell.value" 
+      :value="cell.value" 
     />
   </td>
   <td 
