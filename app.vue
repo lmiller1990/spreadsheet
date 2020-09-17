@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { computed, reactive } from 'vue'
+import { useSpreadsheet } from './composables/spreadsheet'
 import { Sheet, render } from './spreadsheet'
 import SpreadsheetHeader from './spreadsheet-header.vue'
 import SpreadsheetBody from './spreadsheet-body.vue'
@@ -19,26 +20,7 @@ export default {
   },
 
   setup() {
-    const sheet: Sheet = reactive<Sheet>({
-      cells: {
-        'a1': {
-          value: '100',
-          type: 'primitive'
-        },
-        'a2': {
-          value: '200',
-          type: 'primitive'
-        },
-        'b1': {
-          value: '300',
-          type: 'primitive'
-        },
-        'b2': {
-          value: '400',
-          type: 'primitive'
-        },
-      }
-    })
+    const { sheet } = useSpreadsheet()
 
     return {
       sheet: computed(() => render(sheet))

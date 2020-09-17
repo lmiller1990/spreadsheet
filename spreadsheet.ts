@@ -9,8 +9,42 @@ export interface Sheet {
 
 export interface UICell {
   value: string
+  displayValue?: () => string
   col: string // a, b, c.... z
   row: number // 1 2 3....
+}
+
+interface UpdateCell {
+  index: string
+  value: string
+}
+
+export function updateCell(sheet: Sheet, updateCell: UpdateCell) {
+  const { index, value } = updateCell
+  sheet.cells[index].value = value
+}
+
+export function deriveValue(sheet: Sheet, cell: Cell) {
+  const [_, args] = cell.value.match(/=SUM\((.*)\)/)
+  const cells = args.split(',').map(x => parseInt(
+    sheet.cells[x.trim()].value)
+  )
+
+  return cells.reduce((acc, curr) => acc + curr, 0).toString()
+}
+
+export function displayValueFactory(sheet: Sheet, cell?: Cell) {
+  if (!cell) {
+    return () => ''
+  }
+
+  if (cell.type === 'primitive') {
+    return () => cell.value
+  }
+
+  if (cell.type === 'formula') {
+    return () => deriveValue(sheet, cell)
+  }
 }
 
 export function render(sheet: Sheet): UICell[][] {
@@ -28,6 +62,7 @@ export function render(sheet: Sheet): UICell[][] {
       row.push({
         value: cell?.value || '',
         col: letter,
+        displayValue: displayValueFactory(sheet, cell),
         row: j + 1
       })
     }
