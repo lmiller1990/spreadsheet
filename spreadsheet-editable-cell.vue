@@ -1,6 +1,6 @@
 <template>
   <td v-show="active">
-    <input :value="cell.value" ref="cellRef" />
+    <input :value="cell.value" ref="cellRef" @keyup.enter="handleUpdate" />
   </td>
 
   <td 
@@ -8,14 +8,15 @@
     @click="activate"
   >
     <span>
-      {{ cell.value }}
+      {{ cell.displayValue() }}
     </span>
   </td>
 </template>
 
 <script lang="ts">
 import { ref, computed } from 'vue'
-import { UICell } from './spreadsheet'
+import { useSheet } from './composables/sheet'
+import { UICell, updateCell } from './spreadsheet'
 
 export default {
   props: {
@@ -30,6 +31,13 @@ export default {
 
   setup(props, { emit }) {
     const cellRef = ref(null)
+    const { sheet } = useSheet()
+    const handleUpdate = (evt: any) => {
+      updateCell(sheet, {
+        index: `${props.cell.col}${props.cell.row}`,
+        value: evt.target.value
+      })
+    }
 
     const active = computed(() => {
       return props.activeCell === `${props.cell.col}${props.cell.row}`
@@ -43,6 +51,7 @@ export default {
     }
 
     return {
+      handleUpdate,
       active,
       cellRef,
       activate
