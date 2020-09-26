@@ -1,13 +1,15 @@
 <template>
+  <button @click="undo">Undo</button>
+  <button @click="redo">Redo</button>
   <spreadsheet-header :colCount="sheet[0].length" />
   <spreadsheet-body :rows="sheet" />
-<pre>
-{{ sheet }}
-</pre>
+  <pre v-for="state in states">
+{{ state }}
+  </pre>
 </template>
 
 <script lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useSheet } from './composables/sheet'
 import { Sheet, render } from './spreadsheet'
 import SpreadsheetHeader from './spreadsheet-header.vue'
@@ -20,9 +22,17 @@ export default {
   },
 
   setup() {
-    const { sheet } = useSheet()
+    const { sheet, currentState } = useSheet()
+
+    watch(sheet, val => {
+      console.log(val)
+    })
+
     return {
-      sheet: computed(() => render(sheet))
+      undo: () => currentState.value -= 1,
+      redo: () => currentState.value += 1,
+      sheet: computed(() => render(sheet.states[currentState.value])),
+      states: computed(() => sheet.states.map(state => render(state)))
     }
   }
 }

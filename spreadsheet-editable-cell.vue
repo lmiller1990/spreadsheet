@@ -31,12 +31,12 @@ export default {
 
   setup(props, { emit }) {
     const cellRef = ref(null)
-    const { sheet } = useSheet()
+    const { sheet, update } = useSheet()
     const handleUpdate = (evt: any) => {
-      updateCell(sheet, {
-        index: `${props.cell.col}${props.cell.row}`,
-        value: evt.target.value
-      })
+      update(
+        `${props.cell.col}${props.cell.row}`,
+        evt.target.value
+      )
     }
 
     const active = computed(() => {

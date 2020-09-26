@@ -1,45 +1,51 @@
 import { Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell, updateCell, deriveFormula } from './spreadsheet'
 
 const createSheet = (): Sheet => ({
-  cells: {
-    'a1': {
-      value: '100',
-      type: 'primitive'
-    },
-    'a2': {
-      value: '200',
-      type: 'primitive'
-    },
-    'b1': {
-      value: '300',
-      type: 'primitive'
-    },
-    'b2': {
-      value: '=SUM(a1, a2)',
-      type: 'formula'
-    },
-  }
+  states: [
+    {
+      'a1': {
+        value: '100',
+        type: 'primitive'
+      },
+      'a2': {
+        value: '200',
+        type: 'primitive'
+      },
+      'b1': {
+        value: '300',
+        type: 'primitive'
+      },
+      'b2': {
+        value: '=SUM(a1, a2)',
+        type: 'formula'
+      },
+    }
+  ]
 })
 
 test('deriveFormula', () => {
   const sheet = createSheet()
-  const actual = deriveFormula(sheet, sheet.cells['b2'])
+  const actual = deriveFormula(sheet.states[0], sheet.states[0]['b2'])
   expect(actual).toBe('300')
 })
 
-test('updateCell', () => {
-  const sheet = createSheet()
-  updateCell(sheet, {
-    value: '1000',
-    index: 'b1'
+describe('updateCell', () => {
+  it('updates value and type', () => {
+    const sheet = createSheet()
+    updateCell(sheet, {
+      value: '=SUM(a1)',
+      index: 'b1'
+    })
+
+    expect(sheet.states[1]['b1'].value).toBe('=SUM(a1)')
+    expect(sheet.states[1]['b1'].type).toBe('formula')
   })
-  expect(sheet.cells['b1'].value).toBe('1000')
 })
 
 describe('calcMaxDimensions', () => {
   it('calcualtion dimensions', () => {
     const sheet = createSheet()
-    const actual = calcMaxDimensions(sheet)
+    const actual = calcMaxDimensions(sheet.states[0])
     const expected: Dimensions = {
       cols: 2,
       rows: 2
@@ -52,7 +58,7 @@ describe('calcMaxDimensions', () => {
 describe('render', () => {
   it('transforms into a ui rep', () => {
     const sheet = createSheet()
-    const actual = render(sheet).map(row => {
+    const actual = render(sheet.states[0]).map(row => {
       return row.map(cell => {
         const { displayValue, ...rest } = cell
         return rest

@@ -1,10 +1,17 @@
+import { markRaw, toRaw } from "vue"
+
+type CellType = 'primitive' | 'formula'
+
 export interface Cell {
   value: string // a, ct, dog, =SUM()
-  type: 'primitive' | 'formula'
+  type: CellType
 }
 
+
+type Cells = Record<string, Cell>
+
 export interface Sheet {
-  cells: Record<string, Cell>
+  states: Cells[]
 }
 
 export interface UICell {
@@ -14,23 +21,33 @@ export interface UICell {
   row: number // 1 2 3....
 }
 
-interface UpdateCell {
+export interface UpdateCell {
   value: string
   index: string // a1, b2
 }
 
-export function updateCell(sheet: Sheet, cell: UpdateCell) {
-  sheet.cells[cell.index].value = cell.value
+function inferCellType(cell: UpdateCell): CellType {
+  if (cell.value.startsWith('=')) {
+    return 'formula'
+  }
+
+  return 'primitive'
+}
+
+export function updateCell(state: Cells, cell: UpdateCell) {
+  state[cell.index].value = cell.value
+  state[cell.index].type = inferCellType(cell)
+  return state
 }
 
 // =SUM(a1, a2)
-export function deriveFormula(sheet: Sheet, cell: Cell) {
+export function deriveFormula(cells: Cells, cell: Cell) {
   const [_, matches] = cell.value.match(/=SUM\((.*)\)/)
-  const numbers = matches.split(',').map(x => parseInt(sheet.cells[x.trim()].value))
+  const numbers = matches.split(',').map(x => parseInt(cells[x.trim()].value))
   return numbers.reduce((acc, curr) => acc + curr, 0).toString()
 }
 
-function displayValueFactory(sheet: Sheet, cell?: Cell): () => string {
+function displayValueFactory(cells: Cells, cell?: Cell): () => string {
   if (!cell) {
     return () => ''
   }
@@ -40,13 +57,13 @@ function displayValueFactory(sheet: Sheet, cell?: Cell): () => string {
   }
 
   if (cell.type === 'formula') {
-    return () => deriveFormula(sheet, cell)
+    return () => deriveFormula(cells, cell)
   }
 }
 
-export function render(sheet: Sheet): UICell[][] {
+export function render(cells: Cells): UICell[][] {
   const rendered: UICell[][] = []
-  const { cols, rows } = calcMaxDimensions(sheet)
+  const { cols, rows } = calcMaxDimensions(cells)
 
   for (let j = 0; j < rows; j++) {
     const row: UICell[] = []
@@ -54,11 +71,11 @@ export function render(sheet: Sheet): UICell[][] {
     for (let i = 0; i < cols; i++) {
       const letter = String.fromCharCode(i + 'a'.charCodeAt(0))
       const idx = `${letter}${j + 1}`
-      const cell = sheet.cells[idx]
+      const cell = cells[idx]
 
       row.push({
         value: cell?.value || '',
-        displayValue: displayValueFactory(sheet, cell),
+        displayValue: displayValueFactory(cells, cell),
         col: letter,
         row: j + 1
       })
@@ -74,11 +91,11 @@ export interface Dimensions {
   rows: number
 }
 
-export function calcMaxDimensions(sheet: Sheet): Dimensions { 
+export function calcMaxDimensions(cells: Cells): Dimensions { 
   const rows: number[] = []
   const cols: string[] = []
 
-  for (const key of Object.keys(sheet.cells)) {
+  for (const key of Object.keys(cells)) {
     const [_, col, row] = key.match(/(\w.*?)(\d.*)/)
     rows.push(parseInt(row))
     cols.push(col)
