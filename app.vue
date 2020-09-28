@@ -1,8 +1,10 @@
 <template>
+  <button @click="undo">Undo</button>
+  <button @click="redo">Redo</button>
   <spreadsheet-header :colCount="sheet[0].length" />
   <spreadsheet-body :rows="sheet" />
-<pre>
-{{ sheet }}
+<pre v-for="state in states">
+{{ state }}
 </pre>
 </template>
 
@@ -20,9 +22,12 @@ export default {
   },
 
   setup() {
-    const { sheet } = useSheet()
+    const { sheet, currentStateIndex } = useSheet()
     return {
-      sheet: computed(() => render(sheet))
+      undo: () => currentStateIndex.value -= 1,
+      redo: () => currentStateIndex.value += 1,
+      sheet: computed(() => render(sheet.states[currentStateIndex.value])),
+      states: computed(() => sheet.states.map(render))
     }
   }
 }

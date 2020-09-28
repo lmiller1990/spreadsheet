@@ -31,9 +31,9 @@ export default {
 
   setup(props, { emit }) {
     const cellRef = ref(null)
-    const { sheet } = useSheet()
+    const { update } = useSheet()
     const handleUpdate = (evt: any) => {
-      updateCell(sheet, {
+      update({
         index: `${props.cell.col}${props.cell.row}`,
         value: evt.target.value
       })
