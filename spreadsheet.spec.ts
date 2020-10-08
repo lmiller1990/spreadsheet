@@ -1,4 +1,4 @@
-import { Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell, updateCell, deriveFormula } from './spreadsheet'
+import { Cells,  addRow, Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell, updateCell, deriveFormula } from './spreadsheet'
 
 const createSheet = (): Sheet => ({
   states: [{
@@ -21,10 +21,23 @@ const createSheet = (): Sheet => ({
   }]
 })
 
-test('deriveFormula', () => {
-  const sheet = createSheet()
-  const actual = deriveFormula(sheet.states[0], sheet.states[0]['b2'])
-  expect(actual).toBe('300')
+describe('deriveFormula', () => {
+  it('handles happy path', () => {
+    const sheet = createSheet()
+    const actual = deriveFormula(sheet.states[0], sheet.states[0]['b2'])
+    expect(actual).toBe('300')
+  })
+
+  it('handles missing values', () => {
+    const state: Cells = { 
+      'a1': {
+        value: '=SUM(a2)',
+        type: 'formula'
+      },
+    }
+    const actual = deriveFormula(state, state['a1'])
+    expect(actual).toBe('NaN')
+  })
 })
 
 test('updateCell', () => {
@@ -45,6 +58,54 @@ describe('calcMaxDimensions', () => {
       rows: 2
     }
 
+    expect(actual).toEqual(expected)
+  })
+})
+
+describe('addRow', () => {
+  it('adds a row after a given row', () => {
+    const state: Cells = {
+      'a1': {
+        type: 'primitive',
+        value: '1'
+      }, 
+      'a2': {
+        type: 'primitive',
+        value: '2'
+      },
+    }
+    const expected: Cells = {
+      'a1': {
+        type: 'primitive',
+        value: '1'
+      },
+      'a3': {
+        type: 'primitive',
+        value: '2'
+      },
+    }
+    const actual = addRow(state, { at: 1, position: 'after' })
+    expect(actual).toEqual(expected)
+  })
+
+  it('adds a row after a given row', () => {
+    const state: Cells = {
+      'a1': {
+        type: 'primitive',
+        value: '1'
+      },
+    }
+    const expected: Cells = {
+      'a1': {
+        type: 'primitive',
+        value: '1'
+      },
+      'a2': {
+        type: 'primitive',
+        value: ''
+      },
+    }
+    const actual = addRow(state, { at: 1, position: 'after' })
     expect(actual).toEqual(expected)
   })
 })

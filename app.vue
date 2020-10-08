@@ -1,6 +1,12 @@
 <template>
   <button @click="undo">Undo</button>
   <button @click="redo">Redo</button>
+  <button 
+    v-if="selectedCell" 
+    @click="insertRowAfter"
+  >
+    Insert row after
+  </button>
   <spreadsheet-header :colCount="sheet[0].length" />
   <spreadsheet-body :rows="sheet" />
 <pre v-for="state in states">
@@ -9,11 +15,13 @@
 </template>
 
 <script lang="ts">
+import { mount } from '@vue/test-utils'
 import { computed, reactive } from 'vue'
 import { useSheet } from './composables/sheet'
 import { Sheet, render } from './spreadsheet'
 import SpreadsheetHeader from './spreadsheet-header.vue'
 import SpreadsheetBody from './spreadsheet-body.vue'
+console.log(mount)
 
 export default {
   components: {
@@ -22,8 +30,18 @@ export default {
   },
 
   setup() {
-    const { sheet, currentStateIndex } = useSheet()
+    const { 
+      sheet, 
+      currentStateIndex, 
+      selectedCell,
+      insertRowAfter
+    } = useSheet()
+
     return {
+      insertRowAfter: () => {
+        insertRowAfter(selectedCell.value)
+      },
+      selectedCell: computed(() => selectedCell.value),
       undo: () => currentStateIndex.value -= 1,
       redo: () => currentStateIndex.value += 1,
       sheet: computed(() => render(sheet.states[currentStateIndex.value])),

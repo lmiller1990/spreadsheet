@@ -1,8 +1,6 @@
 <template>
   <tr v-for="cells in rows">
-    <td>
-      {{ cells[0].row }}
-    </td>
+    <spreadsheet-label-cell :label="cells[0].row" />
 
     <spreadsheet-editable-cell 
       v-for="cell in cells" 
@@ -17,6 +15,7 @@
 import { Ref, ref, nextTick } from 'vue'
 import { UICell } from './spreadsheet'
 import SpreadsheetEditableCell from './spreadsheet-editable-cell.vue'
+import SpreadsheetLabelCell from './spreadsheet-label-cell.vue'
 
 interface Activate {
   cell: UICell
@@ -25,7 +24,8 @@ interface Activate {
 
 export default {
   components: {
-    SpreadsheetEditableCell
+    SpreadsheetEditableCell,
+    SpreadsheetLabelCell,
   },
 
   props: {

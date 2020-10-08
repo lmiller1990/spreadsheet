@@ -31,16 +31,68 @@ function inferType(cell: UpdateCell): CellType {
   return 'primitive'
 }
 
+export interface AddRow {
+  at: number // 1, 2, 3...
+  position: 'before' | 'after'
+}
+
+export function addRow(state: Cells, { at, position }: AddRow): Cells {
+  // at the end
+  const { rows } = calcMaxDimensions(state)
+  if (rows === at) {
+    const newState: Cells = JSON.parse(JSON.stringify(state))
+    newState[`a${rows + 1}`] = { type: 'primitive', value: '' }
+    return newState
+  } 
+
+  const newState: Cells = {}
+
+  for (const key of Object.keys(state)) {
+    const [_, col, row] = key.match(/(\w.*?)(\d.*)/)
+
+    if (parseInt(row) <= at) {
+      newState[`${col}${row}`] = state[`${col}${row}`]
+    } else {
+      newState[`${col}${parseInt(row) + 1}`] = state[`${col}${row}`]
+    } 
+  }
+
+
+  return newState
+}
+
 export function updateCell(state: Cells, cell: UpdateCell) {
-  const newState = JSON.parse(JSON.stringify(state))
+  const newState: Cells = JSON.parse(JSON.stringify(state))
+  if (!newState[cell.index]) {
+    newState[cell.index] = { 
+      value: cell.value,
+      type: inferType(cell)
+    }
+  }
+
   newState[cell.index].value = cell.value
   newState[cell.index].type = inferType(cell)
   return newState
 }
 
 // =SUM(a1, a2)
-export function deriveFormula(state: Cells, cell: Cell) {
+export function deriveFormula(state: Cells, cell: Cell): string {
   const [_, matches] = cell.value.match(/=SUM\((.*)\)/)
+  const indexes = matches.split(',')
+  const invalid = indexes.some(x => {
+    if (!state[x.trim()]) {
+      return true
+    }
+
+    if (isNaN(parseInt(state[x.trim()].value))) {
+      return true
+    }
+  })
+
+  if (invalid) {
+    return 'NaN'
+  }
+
   const numbers = matches.split(',').map(x => parseInt(state[x.trim()].value))
   return numbers.reduce((acc, curr) => acc + curr, 0).toString()
 }
