@@ -1,4 +1,4 @@
-import { Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell, updateCell, deriveFormula } from './spreadsheet'
+import { insertRow, Dimensions, calcMaxDimensions, Cell, Sheet, render, UICell, updateCell, deriveFormula, Cells } from './spreadsheet'
 
 const createSheet = (): Sheet => ({
   states: [{
@@ -27,6 +27,17 @@ test('deriveFormula', () => {
   expect(actual).toBe('300')
 })
 
+test('deriveFormula', () => {
+  const state: Cells = {
+    a1: {
+      value: '=SUM(a2)',
+      type: 'formula'
+    }
+  }
+  const actual = deriveFormula(state, state['a1'])
+  expect(actual).toBe('NaN')
+})
+
 test('updateCell', () => {
   const sheet = createSheet()
   const actual = updateCell(sheet.states[0], {
@@ -34,6 +45,65 @@ test('updateCell', () => {
     index: 'b1'
   })
   expect(actual['b1'].value).toBe('1000')
+})
+
+test('updateCell', () => {
+  const sheet = createSheet()
+  const actual = updateCell(sheet.states[0], {
+    value: '1000',
+    index: 'b100'
+  })
+  expect(actual['b100'].value).toBe('1000')
+})
+
+test('insertRow', () => {
+  const state: Cells = {
+    a1: {
+      type: 'primitive',
+      value: '100'
+    },
+    a2: {
+      type: 'primitive',
+      value: '200'
+    }
+  }
+
+  const expected = {
+    a1: {
+      type: 'primitive',
+      value: '100'
+    },
+    a3: {
+      type: 'primitive',
+      value: '200'
+    }
+  }
+
+  const actual = insertRow(state, { at: 1, position: 'after' })
+  expect(actual).toEqual(expected)
+})
+
+test('insertRow', () => {
+  const state: Cells = {
+    a1: {
+      type: 'primitive',
+      value: '100'
+    }
+  }
+
+  const expected = {
+    a1: {
+      type: 'primitive',
+      value: '100'
+    },
+    a2: {
+      type: 'primitive',
+      value: ''
+    }
+  }
+
+  const actual = insertRow(state, { at: 1, position: 'after' })
+  expect(actual).toEqual(expected)
 })
 
 describe('calcMaxDimensions', () => {

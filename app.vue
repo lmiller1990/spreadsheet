@@ -1,6 +1,7 @@
 <template>
   <button @click="undo">Undo</button>
   <button @click="redo">Redo</button>
+  <button v-if="selectedCell" @click="insertRowAfter">Insert Row After</button>
   <spreadsheet-header :colCount="sheet[0].length" />
   <spreadsheet-body :rows="sheet" />
 <pre v-for="state in states">
@@ -22,12 +23,14 @@ export default {
   },
 
   setup() {
-    const { sheet, currentStateIndex } = useSheet()
+    const { sheet, currentStateIndex, selectedCell, insertRowAfter } = useSheet()
     return {
       undo: () => currentStateIndex.value -= 1,
       redo: () => currentStateIndex.value += 1,
       sheet: computed(() => render(sheet.states[currentStateIndex.value])),
-      states: computed(() => sheet.states.map(render))
+      states: computed(() => sheet.states.map(render)),
+      selectedCell: computed(() => selectedCell.value),
+      insertRowAfter
     }
   }
 }
